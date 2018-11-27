@@ -1,6 +1,7 @@
 package com.example.ycnim.deeppix
 
 import android.content.Intent
+import android.content.Intent.*
 import android.graphics.BitmapFactory
 import android.net.Uri
 import android.os.Bundle
@@ -23,8 +24,11 @@ import java.util.*
 class MainActivity : AppCompatActivity() {
     private lateinit var mImageView:ImageView
     val REQUEST_TAKE_PHOTO = 1
+    val SELECT_FILE = 2
+    lateinit var selectedImageUri:Uri
     lateinit var mCurrentPhotoPath: String
     lateinit var fab1: FloatingActionButton
+    lateinit var fab2: FloatingActionButton
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
@@ -40,6 +44,15 @@ class MainActivity : AppCompatActivity() {
 
         fab1.setOnClickListener {
             dispatchTakePictureIntent()
+        }
+        fab2 = findViewById(R.id.menu_item_gallery)
+
+        fab2.setOnClickListener {
+            Intent(ACTION_GET_CONTENT, MediaStore.Images.Media.EXTERNAL_CONTENT_URI).also { selectPictureIntent ->
+                intent.addCategory(CATEGORY_OPENABLE)
+                intent.setType("image/*")
+                startActivityForResult(Intent.createChooser(selectPictureIntent,"select file"), SELECT_FILE)
+            }
         }
     }
 
@@ -88,6 +101,14 @@ class MainActivity : AppCompatActivity() {
         if (requestCode == REQUEST_TAKE_PHOTO && resultCode == RESULT_OK) {
             setPic()
             galleryAddPic()
+        }
+        if (requestCode == SELECT_FILE && resultCode == RESULT_OK){
+            selectedImageUri = data?.data as Uri
+            if(selectedImageUri!=null) {
+                println(selectedImageUri)
+                mImageView.setImageURI(selectedImageUri)
+            }
+
         }
     }
 
